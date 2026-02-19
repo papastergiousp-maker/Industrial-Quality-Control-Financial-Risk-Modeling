@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# 1. Η λογική σου με IF-ELIF-ELSE
+# 1. Η λογική  IF-ELIF-ELSE
 def PH_ANALYSIS(ph):
     if ph <= 4.30:
         return "Optimal", 0
@@ -18,7 +18,7 @@ np.random.seed(42)
 # και μικρή απόκλιση, ώστε τα περισσότερα να είναι "σωστά".
 random_ph_values = np.random.normal(loc=4.22, scale=0.12, size=480)
 
-# 3. Εφαρμογή της λογικής
+# 3. Εφαρμογή
 results = []
 for ph in random_ph_values:
     status, loss = PH_ANALYSIS(ph)
@@ -49,5 +49,6 @@ for p in ax.patches:
 
 plt.tight_layout()
 plt.show()
+
 
 print(f"Αποτελέσματα: {stats}")
