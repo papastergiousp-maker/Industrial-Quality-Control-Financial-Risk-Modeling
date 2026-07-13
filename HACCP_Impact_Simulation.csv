@@ -1,0 +1,50 @@
+HACCP / ISO 22000 IMPACT SIMULATION — Baseline vs Optimized (FINAL — Defensible Greek SME costs)
+,,,
+Cost Assumptions,,,,
+Batch value (€),3500,(3 t × €1.150/tn — wholesale paste 28-30 Brix EU 2024-25),,
+Correction cost (€),450,(citric acid + labor + energy + QC + short downtime),,
+Critical Waste cost (€),6000,(lost batch €3500 + sanitization €800 + investigation €400 + disposal €300 + downstream €800 + NCR €200 — ratio 1.71×),,
+Greek tomato season,3 months,(real production: 60-90 days/year Aug-Oct),,
+,,,,
+Metric,Baseline (per month),Optimized (HACCP) per month,Δ per month
+Total batches,720,720,0
+Accepted,589,621,+32
+Correction (€450),85,64,-21
+Critical Waste (€6000),46,35,-11
+Production yield (%),93.61,95.14,+1.53
+Correction cost (€),38250,24480,-13770
+Waste cost (€),276000,210000,-66000
+TOTAL monthly cost (€),314250,234480,-79770
+Monthly savings (€),0,79770,+79770
+,,,,
+Seasonal Annualization (× 3 months),,,
+Annual cost baseline (€),942750,,
+Annual cost with HACCP (€),703440,,
+ANNUAL SAVINGS (€),0,239310,+239310
+Annual revenue recovered (€),0,115500,+115500
+TOTAL ANNUAL IMPACT (€),0,354810,+354810
+,,,,
+Benchmark Validation,,,
+Kyknos S.A. FY 2022-23 turnover (€M),36.29,,
+Our annual impact as %% of Kyknos turnover,0.98%,(reasonable QC improvement),
+Kyknos EBITDA (€M),2.40,,
+Our annual impact as %% of Kyknos EBITDA,14.78%,(strong QC contribution),
+,,,,
+RISK REDUCTION MATRIX (per parameter),,,
+Parameter,Baseline deviations,Optimized (-25%),Risk Level,Control Method
+BRIX,~38,~28,MEDIUM,Inline refractometer + citric acid dosing
+COLOR_a_b,~45,~34,MEDIUM,Hunter Lab spectrophotometer + raw material screening
+BOSTWICK_cm,~52,~39,HIGH,Viscosity meter + consistency control
+pH,~58,~43,HIGH,Inline pH probe + citric acid auto-correction
+ACIDITY_pct,~67,~50,HIGH,Hourly titration QC
+BLOTTER_TEST,~31,~23,MEDIUM,Visual inspection per shift
+SYNERESIS_pct,~42,~31,MEDIUM,Stabilizer dosing + temperature control
+SALT_pct,~24,~18,LOW,Conductivity meter + salt dosing PLC
+,,,,
+NOTES & ASSUMPTIONS,,,
+HACCP = Hazard Analysis Critical Control Points,,
+ISO 22000 = International Food Safety Management System,,
+Assumption: -25%% deviations & waste via CCP monitoring,,
+Assumption: -15%% operational cost via physicochemical QC (Brix/pH/Acidity/Colour),,
+Scale: small-medium aseptic line 3 t/h (Kyknos-scale single line),,
+Sources: Athens Stock Exchange Kyknos FY 22-23 + EU tomato paste market 2024-25,,
