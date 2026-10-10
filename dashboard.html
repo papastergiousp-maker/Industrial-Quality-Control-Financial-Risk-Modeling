@@ -114,7 +114,7 @@
 
   <div class="file-zone" id="dropZone">
     <div class="big">📊 Drop or click to load tomato_qc_data.csv</div>
-    <label for="fileInput">(Επιλογή αρχείου από το folder του project)</label>
+    <label for="fileInput">(Choose tomato_qc_data.csv from the project folder)</label>
     <input type="file" id="fileInput" accept=".csv" />
   </div>
 
@@ -170,7 +170,7 @@
       <div class="card col-8">
         <h2>Daily Trend — Batches & Cost</h2>
         <canvas id="dailyChart"></canvas>
-        <div class="desc">Στοιβαγμένα bars για outcomes + line chart για κόστος QC ανά ημέρα.</div>
+        <div class="desc">Stacked bars show the daily outcomes, the line shows the daily QC cost.</div>
       </div>
       <div class="card col-12">
         <h2>Recent Batches <span class="badge" id="recentCount">last 20</span></h2>
@@ -221,12 +221,12 @@
       <div class="card col-12">
         <h2>Parameter Histograms vs Spec Limits</h2>
         <div class="histogram-grid" id="histGrid"></div>
-        <div class="desc">Κάθε ιστόγραμμα δείχνει την κατανομή της παραμέτρου στις 720 μετρήσεις. Πράσινες γραμμές = target, κόκκινες = spec limits (min/max). Όσο περισσότερες τιμές εκτός των κόκκινων γραμμών, τόσο μεγαλύτερο πρόβλημα ποιότητας.</div>
+        <div class="desc">Each histogram shows one parameter across the 720 samples. Green line: target. Red lines: spec limits (min and max). The more values outside the red lines, the bigger the quality problem.</div>
       </div>
       <div class="card col-6">
         <h2>Pareto — Failure Mode Analysis <span class="badge">80/20 Rule</span></h2>
         <canvas id="paretoChart"></canvas>
-        <div class="desc">Ποιες παράμετροι ευθύνονται για το 80% των αποτυχιών — εκεί επικεντρώνεται η HACCP επένδυση.</div>
+        <div class="desc">Which parameters cause 80% of the failures, so the monitoring effort goes there first.</div>
       </div>
       <div class="card col-6">
         <h2>Process Capability (Cp / Cpk)</h2>
@@ -236,12 +236,12 @@
       <div class="card col-6">
         <h2>Hour-of-Day Failure Pattern</h2>
         <canvas id="hourChart"></canvas>
-        <div class="desc">Failure cost ανά ώρα της ημέρας — εντοπίζει προβληματικές βάρδιες (νύχτα/πρωί).</div>
+        <div class="desc">Failure cost by hour of day. With real data it shows problem shifts; the synthetic data has no shift effect.</div>
       </div>
       <div class="card col-6">
         <h2>Day-of-Week Pattern</h2>
         <canvas id="dowChart"></canvas>
-        <div class="desc">Failure cost ανά ημέρα εβδομάδας — συστηματικά μοτίβα.</div>
+        <div class="desc">Failure cost by day of the week, to spot recurring patterns in real data.</div>
       </div>
       <div class="card col-12">
         <h2>Parameter Performance Summary</h2>
@@ -288,8 +288,8 @@
   </div>
 
   <div class="empty" id="emptyState">
-    <h2 style="color:#94a3b8;margin-bottom:14px">Κάνε load το CSV για να δεις το dashboard</h2>
-    <p>Αρχείο: <code>tomato_qc_data.csv</code> από τον φάκελο του project</p>
+    <h2 style="color:#94a3b8;margin-bottom:14px">Load the CSV to see the dashboard</h2>
+    <p>File: <code>tomato_qc_data.csv</code> from the project folder</p>
   </div>
 
 </div>
