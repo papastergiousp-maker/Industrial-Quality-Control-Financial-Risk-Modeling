@@ -5,7 +5,7 @@ Industrial Tomato Quality Control Pipeline
 ταξινομεί κάθε παρτίδα (Accept / Correction / Reject) και
 υπολογίζει το κόστος επεξεργασίας + waste κόστος.
 
-Spec sheet: MFD-024 (Νομικός D15 - Σάλτσα Τομάτας / Industrial Tomato Paste)
+Spec limits: typical limits for 28-30 Brix aseptic tomato paste
 """
 
 import os
@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from openpyxl.drawing.image import Image as XLImage
 
 # -----------------------------------------------------------------------------
-# 1. SPEC LIMITS (από τα MFD-024 spec sheets)
+# 1. SPEC LIMITS (28-30 Brix aseptic tomato paste)
 # -----------------------------------------------------------------------------
 SPEC = {
     "BRIX":         {"min": 28.0, "max": 30.0, "target": 28.5, "unit": "%"},
@@ -44,6 +44,11 @@ BATCH_VALUE       = 3500    # €/παρτίδα — 3 τόνοι paste × €1.
 HACCP_WASTE_REDUCTION = 0.25   # -25% σε raw material deviations & waste
 HACCP_OPCOST_REDUCTION = 0.15  # -15% operational cost μέσω Brix/pH/Acidity/Colour QC
 SEASON_MONTHS = 3              # Greek tomato season: 60-90 days/year (Aug-Oct), όχι 12 μήνες
+
+
+def round_half_up(x):
+    """Round to the nearest whole batch, halves go up (34.5 -> 35), same as Math.round in the dashboard."""
+    return int(math.floor(x + 0.5))
 
 # -----------------------------------------------------------------------------
 # 2. DATA GENERATION — 24 μετρήσεις/ημέρα × 30 ημέρες = 720
@@ -199,8 +204,8 @@ def haccp_simulation(df, summary):
     accept = summary["Accepted"]
 
     # Optimized = -25% σε waste & corrections, οι παρτίδες αυτές πάνε σε Accept
-    waste_after   = round(waste   * (1 - HACCP_WASTE_REDUCTION))
-    correct_after = round(correct * (1 - HACCP_WASTE_REDUCTION))
+    waste_after   = round_half_up(waste   * (1 - HACCP_WASTE_REDUCTION))
+    correct_after = round_half_up(correct * (1 - HACCP_WASTE_REDUCTION))
     saved_batches = (waste - waste_after) + (correct - correct_after)
     accept_after  = accept + saved_batches
 
@@ -215,6 +220,8 @@ def haccp_simulation(df, summary):
     monthly_savings = total_cost_before - total_cost_after
     annual_savings  = monthly_savings * SEASON_MONTHS
 
+    # Batch value of the avoided waste batches. It is already inside annual_savings,
+    # because COST_CRITICAL includes the lost batch (€3,500), so it must not be added on top.
     revenue_recovered = (waste - waste_after) * BATCH_VALUE * SEASON_MONTHS
 
     yield_before = (accept + correct) / total * 100
@@ -231,7 +238,7 @@ def haccp_simulation(df, summary):
         {"Metric": "TOTAL monthly cost (€)",     "Baseline": total_cost_before,    "Optimized (HACCP)": round(total_cost_after,2),"Δ": round(total_cost_after-total_cost_before,2)},
         {"Metric": "Monthly savings (€)",        "Baseline": 0,                    "Optimized (HACCP)": round(monthly_savings,2),"Δ": round(monthly_savings,2)},
         {"Metric": "Annual savings projection (€)","Baseline": 0,                  "Optimized (HACCP)": round(annual_savings,2),  "Δ": round(annual_savings,2)},
-        {"Metric": "Annual revenue recovered (€)","Baseline": 0,                   "Optimized (HACCP)": round(revenue_recovered,2),"Δ": round(revenue_recovered,2)},
+        {"Metric": "Batch value saved, already inside annual savings (€)","Baseline": 0, "Optimized (HACCP)": round(revenue_recovered,2),"Δ": round(revenue_recovered,2)},
     ])
 
     # Risk reduction matrix ανά παράμετρο
@@ -263,12 +270,13 @@ def haccp_simulation(df, summary):
     ])
 
     notes = pd.DataFrame([
-        {"Note": "HACCP = Hazard Analysis Critical Control Points (μηδενική ανοχή σε κρίσιμα CCPs)"},
-        {"Note": "ISO 22000 = Διεθνές πρότυπο Food Safety Management System"},
-        {"Note": f"Παραδοχή: -{int(HACCP_WASTE_REDUCTION*100)}% deviations & waste μέσω CCP monitoring"},
-        {"Note": f"Παραδοχή: -{int(HACCP_OPCOST_REDUCTION*100)}% operational cost μέσω physicochemical QC (Brix/pH/Acidity/Colour)"},
-        {"Note": f"Annual projection = monthly savings × {SEASON_MONTHS}"},
-        {"Note": "Πηγή ποσοστών: εμπειρία D. Nomikos QC role"},
+        {"Note": "HACCP = Hazard Analysis and Critical Control Points (zero tolerance at critical CCPs)"},
+        {"Note": "ISO 22000 = international standard for food safety management systems"},
+        {"Note": f"Assumption: -{int(HACCP_WASTE_REDUCTION*100)}% deviations and waste through stronger CCP monitoring"},
+        {"Note": f"Assumption: -{int(HACCP_OPCOST_REDUCTION*100)}% correction cost through physicochemical QC (Brix, pH, acidity, colour)"},
+        {"Note": f"Season projection = monthly savings x {SEASON_MONTHS} production months"},
+        {"Note": "Batch value saved is part of the savings (the €6,000 waste cost includes the €3,500 batch), not extra"},
+        {"Note": "Source of the reduction rates: my estimates from the D. Nomikos QC season"},
     ])
 
     return comparison, risk_matrix, notes
@@ -345,7 +353,7 @@ def make_charts(df, summary, charts_dir):
         ax.set_title(f"{param} ({lim['unit']})", fontsize=10, fontweight="bold")
         ax.legend(fontsize=7, loc="upper right")
         ax.grid(alpha=0.3)
-    fig.suptitle("Parameter Distributions vs Spec Limits (MFD-024)",
+    fig.suptitle("Parameter Distributions vs Spec Limits (28-30 Brix aseptic paste)",
                  fontsize=14, fontweight="bold", y=1.00)
     plt.tight_layout()
     plt.savefig(os.path.join(charts_dir, "04_parameter_distributions.png"), dpi=100, bbox_inches="tight")
@@ -354,8 +362,8 @@ def make_charts(df, summary, charts_dir):
     # 5. HACCP Impact comparison
     accept = summary["Accepted"]; correct = summary["Correction (€450)"]
     waste = summary["Critical Waste (€6000)"]
-    waste_after = round(waste * (1 - HACCP_WASTE_REDUCTION))
-    correct_after = round(correct * (1 - HACCP_WASTE_REDUCTION))
+    waste_after = round_half_up(waste * (1 - HACCP_WASTE_REDUCTION))
+    correct_after = round_half_up(correct * (1 - HACCP_WASTE_REDUCTION))
     accept_after = summary["Total batches"] - waste_after - correct_after
 
     correction_cost_before = correct * COST_CORRECTION
@@ -400,7 +408,7 @@ def make_charts(df, summary, charts_dir):
     boxes = [
         (0.02, "CSV\n720 hourly\nmeasurements", "#3498db"),
         (0.20, "Parse 8 params\n(BRIX, COLOR, ...)", "#9b59b6"),
-        (0.38, "Compare to\nMFD-024 spec", "#1abc9c"),
+        (0.38, "Compare to\nspec limits", "#1abc9c"),
         (0.56, "Classify batch\nAccept/Correct/Waste", "#f39c12"),
         (0.74, "Compute cost\n€/batch", "#e74c3c"),
         (0.92, "Excel report\n+ HACCP sim", "#27ae60"),
@@ -488,7 +496,7 @@ def make_charts(df, summary, charts_dir):
         # Highlight out-of-control points
         ooc = (vals > ucl) | (vals < lcl)
         ax.scatter(np.where(ooc)[0], vals[ooc], color="red", s=30, zorder=5, label=f"OOC ({ooc.sum()})")
-        ax.set_title(f"SPC Control Chart — {param} (Western Electric Rules)", fontweight="bold")
+        ax.set_title(f"SPC Control Chart — {param} (3-sigma limits)", fontweight="bold")
         ax.set_xlabel("Batch index (hourly)"); ax.set_ylabel(param)
         ax.legend(loc="upper right", fontsize=8); ax.grid(alpha=0.3)
     plt.tight_layout()
@@ -565,9 +573,9 @@ def make_charts(df, summary, charts_dir):
 
     # 13. ROI / BREAK-EVEN — HACCP investment payback
     haccp_investment = 35000  # ένδειξη: HACCP implementation €5K-15K + ISO 22000 €15K-25K
-    monthly_savings_val = summary["Correction cost (€)"]*HACCP_OPCOST_REDUCTION + \
-                          (summary["Correction (€450)"]*COST_CORRECTION +
-                           summary["Critical Waste (€6000)"]*COST_CRITICAL) * HACCP_WASTE_REDUCTION
+    # Same monthly savings as the HACCP_Impact table and chart 05
+    monthly_savings_val = (correction_cost_before + waste_cost_before) - \
+                          (correction_cost_after + waste_cost_after)
     months = np.arange(0, 13)
     cum_savings = months * monthly_savings_val
     payback_month = haccp_investment / monthly_savings_val if monthly_savings_val > 0 else 0
@@ -744,6 +752,20 @@ if __name__ == "__main__":
         print(f"  - charts/{c}")
 
     write_excel(df, summary, xlsx_path, charts_dir=charts_dir)
-    print(f"\nCSV  : {csv_path}")
+
+    # Standalone HACCP / ISO 22000 scenario table, written from the same calculation as the Excel sheet
+    haccp_csv = os.path.join(here, "HACCP_Impact_Simulation.csv")
+    comparison, risk_matrix, notes = haccp_simulation(df, summary)
+    whole = lambda v: str(int(v)) if isinstance(v, float) and v.is_integer() else v  # 720.0 -> "720"
+    comparison = comparison.astype(object).apply(lambda col: col.map(whole))
+    with open(haccp_csv, "w", newline="", encoding="utf-8") as f:
+        f.write("HACCP / ISO 22000 scenario, per month and per 3-month season (synthetic data)\n")
+        comparison.to_csv(f, index=False)
+        f.write("\nRISK REDUCTION MATRIX (per parameter)\n")
+        risk_matrix.to_csv(f, index=False)
+        f.write("\nNOTES AND ASSUMPTIONS\n")
+        notes.to_csv(f, index=False)
+    print(f"\nHACCP: {haccp_csv}")
+    print(f"CSV  : {csv_path}")
     print(f"Excel: {xlsx_path}")
     print(f"Charts dir: {charts_dir}")

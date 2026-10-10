@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8" />
-<title>Industrial Tomato QC Dashboard — MFD-024</title>
+<title>Industrial Tomato QC Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -104,7 +104,7 @@
   <header>
     <div>
       <h1>Industrial Tomato QC Dashboard
-        <span class="sub">MFD-024 Spec Sheet · D15 Aseptic Paste Line · Greek Tomato Season 2025</span>
+        <span class="sub">28-30 Brix Aseptic Tomato Paste · Synthetic Data · Greek Tomato Season 2025</span>
       </h1>
     </div>
     <div>
@@ -158,14 +158,14 @@
       <div class="kpi waste"><div class="label">Critical Waste</div><div class="value" id="kpiWaste">—</div><div class="sub" id="kpiWastePct">—</div></div>
       <div class="kpi yield"><div class="label">Production Yield</div><div class="value" id="kpiYield">—</div><div class="sub">Accept + Correction</div></div>
       <div class="kpi cost"><div class="label">Monthly QC Cost</div><div class="value" id="kpiCost">—</div><div class="sub">Correction + Waste</div></div>
-      <div class="kpi savings"><div class="label">HACCP Annual Impact</div><div class="value" id="kpiHaccp">—</div><div class="sub">×3 months Greek season</div></div>
+      <div class="kpi savings"><div class="label">HACCP Season Savings</div><div class="value" id="kpiHaccp">—</div><div class="sub">×3 months Greek season</div></div>
     </div>
 
     <div class="grid">
       <div class="card col-4">
         <h2>Batch Status Distribution <span class="badge" id="totalBatches">—</span></h2>
         <canvas id="statusChart"></canvas>
-        <div class="desc">Donut chart των ωριαίων δειγμάτων ταξινομημένων κατά MFD-024 spec.</div>
+        <div class="desc">Hourly samples classified against the spec limits.</div>
       </div>
       <div class="card col-8">
         <h2>Daily Trend — Batches & Cost</h2>
@@ -209,7 +209,7 @@
       <div class="haccp-results">
         <div class="haccp-res"><div class="label">Monthly savings</div><div class="v" id="hMonth">—</div><div class="delta" id="hMonthD">—</div></div>
         <div class="haccp-res"><div class="label">Annual savings</div><div class="v" id="hYear">—</div><div class="delta" id="hYearD">—</div></div>
-        <div class="haccp-res"><div class="label">Revenue recovered</div><div class="v" id="hRev">—</div><div class="delta">batches reclaimed</div></div>
+        <div class="haccp-res"><div class="label">Batch value saved</div><div class="v" id="hRev">—</div><div class="delta">already inside the savings</div></div>
         <div class="haccp-res"><div class="label">ROI break-even</div><div class="v" id="hRoi">—</div><div class="delta" id="hRoiD">months</div></div>
       </div>
     </div>
@@ -219,7 +219,7 @@
     <div class="tab-content" id="tab-statistical">
     <div class="grid">
       <div class="card col-12">
-        <h2>Parameter Histograms vs MFD-024 Spec Limits</h2>
+        <h2>Parameter Histograms vs Spec Limits</h2>
         <div class="histogram-grid" id="histGrid"></div>
         <div class="desc">Κάθε ιστόγραμμα δείχνει την κατανομή της παραμέτρου στις 720 μετρήσεις. Πράσινες γραμμές = target, κόκκινες = spec limits (min/max). Όσο περισσότερες τιμές εκτός των κόκκινων γραμμών, τόσο μεγαλύτερο πρόβλημα ποιότητας.</div>
       </div>
@@ -282,8 +282,8 @@
     </div><!-- /tab-gallery -->
 
     <footer>
-      Industrial Tomato QC Pipeline · Spec sheet MFD-024 (D15 Aseptic) · Greek tomato season 25 Jun → 24 Jul 2025
-      <br/>Cost model: Batch €3.500 · Correction €450 · Critical Waste €6.000 · Defensible vs Kyknos S.A. FY 2022-23 (turnover €36.29M, EBITDA €2.40M)
+      Industrial Tomato QC Pipeline · 28-30 Brix aseptic paste · Synthetic data, simulated season 25 Jun → 24 Jul 2025
+      <br/>Cost model: Batch €3.500 · Correction €450 · Critical Waste €6.000 · Scale check: Kyknos S.A. FY 2022-23 (turnover €36.29M, EBITDA €2.40M)
     </footer>
   </div>
 
@@ -721,7 +721,8 @@ function updateHaccp() {
   const monthlySaved = monthlyBefore - monthlyAfter;
   const annualSaved  = monthlySaved * mYr;
   const revRecovered = (waste - wasteAfter) * BATCH_VALUE * mYr;
-  const totalImpact  = annualSaved + revRecovered;
+  // revRecovered is the batch value of the avoided waste batches. It is already part of
+  // annualSaved (the €6,000 waste cost includes the €3,500 lost batch), so it is not added again.
   const payback      = monthlySaved > 0 ? inv / monthlySaved : Infinity;
 
   document.getElementById("hMonth").textContent = "€" + Math.round(monthlySaved).toLocaleString("el-GR");
@@ -732,7 +733,7 @@ function updateHaccp() {
   document.getElementById("hRoi").textContent   = isFinite(payback) ? payback.toFixed(1) : "—";
   document.getElementById("hRoiD").textContent  = isFinite(payback) ? `months payback (€${inv.toLocaleString("el-GR")} inv)` : "no positive savings";
 
-  document.getElementById("kpiHaccp").textContent = "€" + Math.round(totalImpact).toLocaleString("el-GR");
+  document.getElementById("kpiHaccp").textContent = "€" + Math.round(annualSaved).toLocaleString("el-GR");
 }
 
 function destroy(id) {
