@@ -6,6 +6,8 @@ A Python project that checks the hourly lab samples of an aseptic tomato paste l
 
 **Live dashboard:** [phytai.com/tomato-qc.html](https://phytai.com/tomato-qc.html) (click Run demo)
 
+![Dashboard preview](images/dashboard_preview.jpg)
+
 ---
 
 ## Business Question
